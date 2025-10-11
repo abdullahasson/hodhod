@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>و أحبك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            transition: background 2s ease;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .letter {
+            font-size: 120px;
+            font-weight: bold;
+            color: #333;
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .letter.animate {
+            animation: letterPulse 0.8s ease-in-out 2;
+        }
+
+        .heart {
+            font-size: 120px;
+            color: #ff4d6d;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-shadow: 0 4px 12px rgba(255, 77, 109, 0.4);
+            cursor: pointer;
+        }
+
+        .heart.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            animation: heartbeat 1.5s infinite alternate;
+        }
+
+        .hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .falling-heart {
+            position: absolute;
+            font-size: 24px;
+            color: #ff4d6d;
+            animation: fall linear forwards;
+            opacity: 0.7;
+            text-shadow: 0 2px 4px rgba(255, 77, 109, 0.3);
+        }
+
+        .message {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            color: #ff4d6d;
+            opacity: 0;
+            transition: opacity 1s ease;
+            white-space: nowrap;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90%;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .btn:hover {
+            background: #ff3355;
+            transform: translateY(-2px);
+        }
+
+        .counter {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            color: #ff4d6d;
+            background: rgba(255,255,255,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            z-index: 20;
+        }
+
+        /* القلب الكبير للرسالة */
+        .big-heart-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 300px;
+            height: 280px;
+            background: #ff4d6d;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 100;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+            text-align: center;
+        }
+
+        .big-heart-message::before,
+        .big-heart-message::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 240px;
+            background: #ff4d6d;
+            border-radius: 150px 150px 0 0;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .big-heart-message::after {
+            left: 50%;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        .big-heart-message.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .message-content {
+            position: relative;
+            z-index: 10;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            line-height: 1.5;
+            max-width: 80%;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        @keyframes letterPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes heartbeat {
+            from {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* تصميم متجاوب للهواتف */
+        @media (max-width: 768px) {
+            .letter, .heart {
+                font-size: 80px;
+            }
+            .message {
+                font-size: 1.5rem;
+            }
+            .big-heart-message {
+                width: 250px;
+                height: 230px;
+            }
+            .message-content {
+                font-size: 1.3rem;
+            }
+            .big-heart-message::before,
+            .big-heart-message::after {
+                width: 125px;
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .letter, .heart {
+                font-size: 60px;
+            }
+            .message {
+                font-size: 1.2rem;
+            }
+            .btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .big-heart-message {
+                width: 200px;
+                height: 180px;
+            }
+            .message-content {
+                font-size: 1rem;
+            }
+            .big-heart-message::before,
+            .big-heart-message::after {
+                width: 100px;
+                height: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="letter" id="letter">H</div>
+        <div class="heart" id="heart">❤️</div>
+        <div class="message" id="message">أحبك</div>
+    </div>
+    <div class="hearts-container" id="heartsContainer"></div>
+    
+    <div class="counter" id="counter">القلوب: 0</div>
+    
+    <div class="controls">
+        <button class="btn" id="restartBtn">إعادة التشغيل</button>
+        <button class="btn" id="toggleBtn">إيقاف/تشغيل القلوب</button>
+        <button class="btn" id="colorBtn">تغيير اللون</button>
+        <button class="btn" id="messageBtn">رسالة</button>
+    </div>
+
+    <!-- القلب الكبير للرسالة -->
+    <div class="overlay" id="overlay"></div>
+    <div class="big-heart-message" id="bigHeartMessage">
+        <button class="close-btn" id="closeBtn">✕</button>
+        <div class="message-content" id="messageContent">
+            أنا ما بنسى ولا وعد وعدتك فيه
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const letter = document.getElementById('letter');
+            const heart = document.getElementById('heart');
+            const heartsContainer = document.getElementById('heartsContainer');
+            const message = document.getElementById('message');
+            const counter = document.getElementById('counter');
+            const restartBtn = document.getElementById('restartBtn');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const colorBtn = document.getElementById('colorBtn');
+            const messageBtn = document.getElementById('messageBtn');
+            const bigHeartMessage = document.getElementById('bigHeartMessage');
+            const overlay = document.getElementById('overlay');
+            const closeBtn = document.getElementById('closeBtn');
+            const messageContent = document.getElementById('messageContent');
+            const body = document.body;
+            
+            let heartsCount = 0;
+            let heartsInterval;
+            let isHeartsFalling = true;
+            let currentColorIndex = 0;
+            const heartColors = ['#ff4d6d', '#ff8fa3', '#c9184a', '#ff758f', '#ff0a54'];
+            const bgColors = [
+                'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)',
+                'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+                'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
+                'linear-gradient(135deg, #f6d365 0%, #fda085 100%)'
+            ];
+            
+            // رسائل عشوائية للقلب الكبير
+            const messages = [
+                " أنا ما بنسى ولا وعد وعدتك فيه"
+            ];
+            
+            // بدء التأثير
+            startEffect();
+            
+            // إعادة التشغيل
+            restartBtn.addEventListener('click', function() {
+                resetEffect();
+                setTimeout(startEffect, 500);
+            });
+            
+            // تبديل تشغيل/إيقاف القلوب
+            toggleBtn.addEventListener('click', function() {
+                isHeartsFalling = !isHeartsFalling;
+                if (isHeartsFalling) {
+                    startHeartsFall();
+                    toggleBtn.textContent = 'إيقاف القلوب';
+                } else {
+                    clearInterval(heartsInterval);
+                    toggleBtn.textContent = 'تشغيل القلوب';
+                }
+            });
+            
+            // تغيير لون الخلفية والقلوب
+            colorBtn.addEventListener('click', function() {
+                currentColorIndex = (currentColorIndex + 1) % bgColors.length;
+                body.style.background = bgColors[currentColorIndex];
+                heart.style.color = heartColors[currentColorIndex % heartColors.length];
+            });
+            
+            // فتح رسالة القلب الكبير
+            messageBtn.addEventListener('click', function() {
+                // اختيار رسالة عشوائية
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                messageContent.textContent = randomMessage;
+                
+                // إظهار القلب الكبير
+                bigHeartMessage.classList.add('active');
+                overlay.classList.add('active');
+            });
+            
+            // إغلاق القلب الكبير
+            closeBtn.addEventListener('click', function() {
+                bigHeartMessage.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // إغلاق بالنقر خارج القلب
+            overlay.addEventListener('click', function() {
+                bigHeartMessage.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // تفاعل عند النقر على القلب
+            heart.addEventListener('click', function() {
+                createHeartsBurst(15);
+            });
+            
+            function startEffect() {
+                // إضافة نبض للحرف H قبل التحول
+                setTimeout(function() {
+                    letter.classList.add('animate');
+                    
+                    // بدء التحول بعد انتهاء النبض
+                    setTimeout(function() {
+                        // إخفاء الحرف H بتلاشي وتصغير
+                        letter.style.opacity = '0';
+                        letter.style.transform = 'scale(0.5) rotate(180deg)';
+                        
+                        // إظهار القلب بتلاشي وتكبير
+                        heart.classList.add('active');
+                        
+                        // بدء تناثر القلوب
+                        startHeartsFall();
+                        
+                        // إظهار الرسالة بعد تأخير
+                        setTimeout(function() {
+                            message.classList.add('show');
+                            message.style.animation = 'float 3s ease-in-out infinite';
+                        }, 1000);
+                        
+                    }, 1600); // بعد انتهاء النبض مرتين
+                }, 500); // تأخير بسيط قبل البدء
+            }
+            
+            function resetEffect() {
+                // إعادة تعيين العناصر
+                letter.classList.remove('animate');
+                letter.style.opacity = '1';
+                letter.style.transform = 'scale(1) rotate(0deg)';
+                
+                heart.classList.remove('active');
+                heart.style.color = '#ff4d6d';
+                
+                message.classList.remove('show');
+                message.style.animation = 'none';
+                
+                // إغلاق القلب الكبير إذا كان مفتوحًا
+                bigHeartMessage.classList.remove('active');
+                overlay.classList.remove('active');
+                
+                // إزالة جميع القلوب المتساقطة
+                while (heartsContainer.firstChild) {
+                    heartsContainer.removeChild(heartsContainer.firstChild);
+                }
+                
+                // إعادة تعيين العدادات
+                heartsCount = 0;
+                updateCounter();
+                
+                // إعادة تعيين الخلفية
+                body.style.background = bgColors[0];
+                currentColorIndex = 0;
+                
+                // إيقاف القلوب
+                clearInterval(heartsInterval);
+                isHeartsFalling = true;
+                toggleBtn.textContent = 'إيقاف القلوب';
+            }
+            
+            function startHeartsFall() {
+                heartsInterval = setInterval(function() {
+                    createFallingHeart();
+                }, 300);
+            }
+            
+            function createFallingHeart() {
+                const fallingHeart = document.createElement('div');
+                fallingHeart.classList.add('falling-heart');
+                fallingHeart.innerHTML = '❤️';
+                
+                // تحديد موقع البداية عشوائيًا في الجزء العلوي
+                const startPosition = Math.random() * window.innerWidth;
+                fallingHeart.style.left = startPosition + 'px';
+                fallingHeart.style.top = '-30px';
+                
+                // تحديد مدة السقوط عشوائيًا
+                const duration = 3 + Math.random() * 5;
+                fallingHeart.style.animationDuration = duration + 's';
+                
+                // حجم عشوائي للقلوب المتساقطة
+                const size = 15 + Math.random() * 25;
+                fallingHeart.style.fontSize = size + 'px';
+                
+                // لون عشوائي للقلوب
+                fallingHeart.style.color = heartColors[Math.floor(Math.random() * heartColors.length)];
+                
+                heartsContainer.appendChild(fallingHeart);
+                heartsCount++;
+                updateCounter();
+                
+                // إزالة القلب بعد انتهاء الحركة
+                setTimeout(function() {
+                    if (fallingHeart.parentNode) {
+                        fallingHeart.remove();
+                    }
+                }, duration * 1000);
+            }
+            
+            function createHeartsBurst(count) {
+                for (let i = 0; i < count; i++) {
+                    setTimeout(function() {
+                        createFallingHeart();
+                    }, i * 50);
+                }
+            }
+            
+            function updateCounter() {
+                counter.textContent = `القلوب: ${heartsCount}`;
+            }
+        });
+    </script>
+</body>
+</html>
