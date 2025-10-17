@@ -235,6 +235,49 @@
             pointer-events: all;
         }
 
+        /* أنيميشن الذراعين العضليين */
+        .arms-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .arm {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .arm.left {
+            left: 10%;
+            top: 50%;
+            transform: translate(-100px, -50%) rotate(-30deg);
+        }
+
+        .arm.right {
+            right: 10%;
+            top: 50%;
+            transform: translate(100px, -50%) rotate(30deg);
+        }
+
+        .arm.active {
+            opacity: 1;
+            transform: translate(0, -50%) rotate(0deg);
+            animation: armFlex 1.5s ease-in-out infinite alternate;
+        }
+
+        .arm.active.right {
+            opacity: 1;
+            transform: translate(0, -50%) rotateY(180deg) !important;
+            animation: armFlex 1.5s ease-in-out infinite alternate;
+        }
+
         @keyframes letterPulse {
             0% {
                 transform: scale(1);
@@ -276,6 +319,15 @@
             }
         }
 
+        @keyframes armFlex {
+            0%, 100% {
+                transform: translate(0, -50%) scale(1);
+            }
+            50% {
+                transform: translate(0, -50%) scale(1.1);
+            }
+        }
+
         /* تصميم متجاوب للهواتف */
         @media (max-width: 768px) {
             .letter, .heart {
@@ -295,6 +347,9 @@
             .big-heart-message::after {
                 width: 125px;
                 height: 200px;
+            }
+            .arm {
+                font-size: 80px;
             }
         }
 
@@ -321,6 +376,15 @@
                 width: 100px;
                 height: 160px;
             }
+            .arm {
+                font-size: 60px;
+            }
+            .arm.left {
+                left: 5%;
+            }
+            .arm.right {
+                right: 5%;
+            }
         }
     </style>
 </head>
@@ -331,6 +395,7 @@
         <div class="message" id="message">أحبك</div>
     </div>
     <div class="hearts-container" id="heartsContainer"></div>
+    <div class="arms-container" id="armsContainer"></div>
     
     <div class="counter" id="counter">القلوب: 0</div>
     
@@ -339,6 +404,7 @@
         <button class="btn" id="toggleBtn">إيقاف/تشغيل القلوب</button>
         <button class="btn" id="colorBtn">تغيير اللون</button>
         <button class="btn" id="messageBtn">رسالة</button>
+        <button class="btn" id="hugBtn">خدي البايسبس</button>
     </div>
 
     <!-- القلب الكبير للرسالة -->
@@ -355,12 +421,14 @@
             const letter = document.getElementById('letter');
             const heart = document.getElementById('heart');
             const heartsContainer = document.getElementById('heartsContainer');
+            const armsContainer = document.getElementById('armsContainer');
             const message = document.getElementById('message');
             const counter = document.getElementById('counter');
             const restartBtn = document.getElementById('restartBtn');
             const toggleBtn = document.getElementById('toggleBtn');
             const colorBtn = document.getElementById('colorBtn');
             const messageBtn = document.getElementById('messageBtn');
+            const hugBtn = document.getElementById('hugBtn');
             const bigHeartMessage = document.getElementById('bigHeartMessage');
             const overlay = document.getElementById('overlay');
             const closeBtn = document.getElementById('closeBtn');
@@ -440,6 +508,11 @@
                 createHeartsBurst(15);
             });
             
+            // تفعيل أنيميشن الذراعين العضليين
+            hugBtn.addEventListener('click', function() {
+                showMuscleArms();
+            });
+            
             function startEffect() {
                 // إضافة نبض للحرف H قبل التحول
                 setTimeout(function() {
@@ -478,6 +551,10 @@
                 
                 message.classList.remove('show');
                 message.style.animation = 'none';
+                
+                // إزالة الذراعين إذا كانا موجودين
+                const existingArms = document.querySelectorAll('.arm');
+                existingArms.forEach(arm => arm.remove());
                 
                 // إغلاق القلب الكبير إذا كان مفتوحًا
                 bigHeartMessage.classList.remove('active');
@@ -547,6 +624,39 @@
                         createFallingHeart();
                     }, i * 50);
                 }
+            }
+            
+            function showMuscleArms() {
+                // إنشاء الذراع الأيسر
+                const leftArm = document.createElement('div');
+                leftArm.classList.add('arm', 'left');
+                leftArm.innerHTML = '💪';
+                
+                // إنشاء الذراع الأيمن
+                const rightArm = document.createElement('div');
+                rightArm.classList.add('arm', 'right');
+                rightArm.innerHTML = '💪';
+                
+                // إضافة الذراعين إلى الحاوية
+                armsContainer.appendChild(leftArm);
+                armsContainer.appendChild(rightArm);
+                
+                // تفعيل الأنيميشن بعد تأخير بسيط
+                setTimeout(() => {
+                    leftArm.classList.add('active');
+                    rightArm.classList.add('active');
+                }, 100);
+                
+                // إزالة الذراعين بعد 5 ثوانٍ
+                setTimeout(() => {
+                    leftArm.classList.remove('active');
+                    rightArm.classList.remove('active');
+                    
+                    setTimeout(() => {
+                        if (leftArm.parentNode) leftArm.remove();
+                        if (rightArm.parentNode) rightArm.remove();
+                    }, 1000);
+                }, 5000);
             }
             
             function updateCounter() {
